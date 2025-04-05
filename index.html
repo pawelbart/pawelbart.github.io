@@ -28,9 +28,10 @@
         .tab-button.active {
             background-color: #ffffff; /* White */
             color: #1d4ed8; /* Blue */
-            border-bottom: 2px solid #1d4ed8; /* Blue bottom border */
+            /* Use border instead of box-shadow for active indicator if preferred */
+            border-bottom: 2px solid #1d4ed8;
         }
-        .tab-button:not(.active):hover {
+         .tab-button:not(.active):hover {
              background-color: #c7d2fe; /* Lighter indigo on hover */
         }
         .tab-content {
@@ -41,7 +42,7 @@
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         }
         .tab-content.active {
-            display: block; /* Show active content */
+            display: block; /* Show active content based on class */
         }
 
         /* --- Styles common to both tabs --- */
@@ -148,7 +149,7 @@
                 <div id="test-problems-list"></div>
                 <div id="test-score-area"></div>
                  <div class="flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                    <button id="test-check-button" class="btn btn-primary">Sprawdź</button>
+                    <button id="test-check-button" class="btn btn-primary">Poznaj wynik</button>
                     <button id="test-new-button" class="btn btn-secondary">Nowy sprawdzian</button>
                 </div>
             </div>
@@ -160,6 +161,7 @@
         const tabButtons = document.querySelectorAll('.tab-button');
         const tabContents = document.querySelectorAll('.tab-content');
         const NUM_TEST_PROBLEMS = 12;
+        const STORAGE_KEY = 'mathAppState'; // Key for localStorage
 
         // --- Common Helper Functions ---
         function getRandomInt(min, max) {
@@ -173,31 +175,171 @@
             return box;
         }
 
+        // --- State Management (localStorage) ---
+        function saveState() {
+            const practiceInputElement = document.getElementById('practice-answer-input');
+            const testAnswers = {};
+            // Only attempt to read test answers if the test tab elements exist
+            if (document.getElementById('test-problems-list')) {
+                 testProblemsData.forEach((_, index) => {
+                    const inputElement = document.getElementById(`test-answer-input-${index}`);
+                    if (inputElement) {
+                        testAnswers[index] = inputElement.value;
+                    }
+                });
+            }
+
+            const state = {
+                activeTab: document.querySelector('.tab-button.active')?.getAttribute('data-tab') || 'practice-tab',
+                practice: {
+                    problem: currentPracticeProblem,
+                    feedback: practiceFeedbackDiv.innerHTML,
+                    checkDisabled: practiceCheckButton.disabled,
+                    newDisabled: practiceNewButton.disabled,
+                    inputValue: practiceInputElement ? practiceInputElement.value : '',
+                    inputDisabled: practiceInputElement ? practiceInputElement.disabled : false,
+                    inputClasses: practiceInputElement ? [...practiceInputElement.classList] : [] // Save styling classes
+                },
+                test: {
+                    problems: testProblemsData,
+                    answers: testAnswers, // Save collected answers
+                    checked: testAnswersChecked,
+                    scoreHTML: testScoreAreaDiv.innerHTML,
+                    checkDisabled: testCheckButton.disabled,
+                    newDisabled: testNewButton.disabled
+                }
+            };
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                // console.log("State saved:", state); // Debugging line
+            } catch (e) {
+                console.error("Error saving state to localStorage:", e);
+            }
+        }
+
+        function loadState() {
+            try {
+                const savedStateString = localStorage.getItem(STORAGE_KEY);
+                if (!savedStateString) {
+                    // console.log("No saved state found."); // Debugging line
+                    return false; // No saved state
+                }
+
+                const state = JSON.parse(savedStateString);
+                if (!state) {
+                     // console.log("Invalid saved state found."); // Debugging line
+                    return false; // Invalid state
+                }
+                 // console.log("State loaded:", state); // Debugging line
+
+                // Restore Active Tab - Crucially, only add/remove classes
+                const activeTabId = state.activeTab || 'practice-tab';
+                tabButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.getAttribute('data-tab') === activeTabId);
+                });
+                tabContents.forEach(content => {
+                    content.classList.toggle('active', content.id === activeTabId);
+                });
+
+
+                // Restore Practice State
+                if (state.practice && state.practice.problem && Object.keys(state.practice.problem).length > 0) {
+                    currentPracticeProblem = state.practice.problem;
+                    renderPracticeProblem(currentPracticeProblem); // Re-render based on data
+                    practiceFeedbackDiv.innerHTML = state.practice.feedback || '';
+                    practiceCheckButton.disabled = state.practice.checkDisabled;
+                    practiceNewButton.disabled = state.practice.newDisabled;
+                    const practiceInputElement = document.getElementById('practice-answer-input');
+                    if (practiceInputElement) {
+                        practiceInputElement.value = state.practice.inputValue || '';
+                        practiceInputElement.disabled = state.practice.inputDisabled;
+                        // Restore styling (correct/incorrect)
+                        practiceInputElement.className = 'input-box'; // Reset first
+                        if (state.practice.inputClasses) {
+                            state.practice.inputClasses.forEach(cls => {
+                                if (cls !== 'input-box') practiceInputElement.classList.add(cls);
+                            });
+                        }
+                    }
+                } else if (activeTabId === 'practice-tab') {
+                    // If practice tab is active but no state, generate initial problem
+                    generatePracticeProblem();
+                }
+
+
+                // Restore Test State
+                if (state.test && state.test.problems && state.test.problems.length > 0) {
+                    testProblemsData = state.test.problems;
+                    testAnswersChecked = state.test.checked;
+                    displayTestProblems(state.test.answers); // Pass saved answers to display function
+                    testScoreAreaDiv.innerHTML = state.test.scoreHTML || '';
+                    testCheckButton.disabled = state.test.checkDisabled;
+                    testNewButton.disabled = state.test.newDisabled;
+
+                    // If test was checked, re-apply disabled state and styles to inputs
+                    if (testAnswersChecked) {
+                        testProblemsData.forEach((problem, index) => {
+                           const inputElement = document.getElementById(`test-answer-input-${index}`);
+                           if(inputElement) {
+                               inputElement.disabled = true;
+                               const userAnswer = parseInt(inputElement.value, 10); // Value was restored by displayTestProblems
+                               inputElement.classList.remove('correct', 'incorrect');
+                               if (!isNaN(userAnswer) && userAnswer === problem.correctAnswer) {
+                                    inputElement.classList.add('correct');
+                               } else {
+                                    inputElement.classList.add('incorrect');
+                               }
+                           }
+                        });
+                    }
+                } else if (activeTabId === 'test-tab') {
+                    // If test tab is active but no state, generate initial test
+                    generateTestProblems();
+                }
+
+                return true; // State loaded successfully
+
+            } catch (e) {
+                console.error("Error loading state from localStorage:", e);
+                localStorage.removeItem(STORAGE_KEY); // Clear corrupted state
+                return false; // Loading failed
+            }
+        }
+
+
         // --- Tab Switching Logic ---
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const targetTabId = button.getAttribute('data-tab');
 
-                // Deactivate all tabs
+                // Deactivate all tabs (visually)
                 tabButtons.forEach(btn => btn.classList.remove('active'));
                 tabContents.forEach(content => content.classList.remove('active'));
 
-                // Activate target tab
+                // Activate target tab (visually)
                 button.classList.add('active');
-                document.getElementById(targetTabId).classList.add('active');
+                const targetContent = document.getElementById(targetTabId);
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                } else {
+                    console.error("Target tab content not found:", targetTabId);
+                    return; // Exit if target content doesn't exist
+                }
 
-                // Initialize the active tab content
+
+                // Initialize content if it's empty and hasn't been loaded/restored
                 if (targetTabId === 'practice-tab') {
-                    // Check if practice problem needs generation (e.g., if equation div is empty)
-                    if (!practiceEquationDiv.hasChildNodes()) {
+                    // Generate only if the equation div is truly empty AND no problem data exists
+                    if (!practiceEquationDiv.hasChildNodes() && Object.keys(currentPracticeProblem).length === 0) {
                          generatePracticeProblem();
                     }
                 } else if (targetTabId === 'test-tab') {
-                     // Check if test problems need generation
-                     if (!testProblemsListDiv.hasChildNodes()) {
+                     // Generate only if the list is empty AND no test data exists
+                     if (!testProblemsListDiv.hasChildNodes() && testProblemsData.length === 0) {
                          generateTestProblems();
                      }
                 }
+                saveState(); // Save state after switching tab and potentially initializing
             });
         });
 
@@ -255,6 +397,8 @@
                     event.preventDefault(); checkPracticeAnswer();
                 }
             });
+            // Save state on input change (optional, can be performance heavy)
+            // input.addEventListener('input', saveState);
             return input;
         }
 
@@ -269,24 +413,38 @@
             return `<div class="explanation">💡 ${explanationText}</div>`;
         }
 
-        function generatePracticeProblem() {
-            currentPracticeProblem = generateSingleProblemData();
-            practiceFeedbackDiv.innerHTML = '';
-            practiceEquationDiv.innerHTML = '';
-            const { num1, num2, result, operator, unknownPosition } = currentPracticeProblem;
+        // Renders the practice problem based on data (used by generate and load)
+        function renderPracticeProblem(problemData) {
+             practiceEquationDiv.innerHTML = ''; // Clear previous
+             if (!problemData || Object.keys(problemData).length === 0) return; // Don't render if no data
+
+             const { num1, num2, result, operator, unknownPosition } = problemData;
 
             if (unknownPosition === 0) { practiceEquationDiv.appendChild(createPracticeInputBox()); practiceEquationDiv.appendChild(createBox(operator, 'operator')); practiceEquationDiv.appendChild(createBox(num2)); practiceEquationDiv.appendChild(createBox('=', 'operator')); practiceEquationDiv.appendChild(createBox(result)); }
             else if (unknownPosition === 1) { practiceEquationDiv.appendChild(createBox(num1)); practiceEquationDiv.appendChild(createBox(operator, 'operator')); practiceEquationDiv.appendChild(createPracticeInputBox()); practiceEquationDiv.appendChild(createBox('=', 'operator')); practiceEquationDiv.appendChild(createBox(result)); }
             else { practiceEquationDiv.appendChild(createBox(num1)); practiceEquationDiv.appendChild(createBox(operator, 'operator')); practiceEquationDiv.appendChild(createBox(num2)); practiceEquationDiv.appendChild(createBox('=', 'operator')); practiceEquationDiv.appendChild(createPracticeInputBox()); }
+        }
+
+
+        function generatePracticeProblem() {
+            currentPracticeProblem = generateSingleProblemData();
+            renderPracticeProblem(currentPracticeProblem); // Use render function
+            practiceFeedbackDiv.innerHTML = '';
 
             practiceCheckButton.disabled = false;
             practiceNewButton.disabled = true;
             const inputElement = document.getElementById('practice-answer-input');
             if (inputElement) { inputElement.value = ''; inputElement.focus(); inputElement.disabled = false; inputElement.classList.remove('correct', 'incorrect');}
+            saveState(); // Save new practice state
         }
 
         function checkPracticeAnswer() {
             const inputElement = document.getElementById('practice-answer-input');
+            // Ensure element exists before proceeding
+            if (!inputElement) {
+                console.error("Practice input element not found!");
+                return;
+            }
             const userAnswer = parseInt(inputElement.value, 10);
             practiceFeedbackDiv.innerHTML = '';
             inputElement.classList.remove('correct', 'incorrect');
@@ -307,6 +465,7 @@
             practiceCheckButton.disabled = true;
             practiceNewButton.disabled = false;
             inputElement.disabled = true;
+            saveState(); // Save state after checking
         }
 
         practiceCheckButton.addEventListener('click', checkPracticeAnswer);
@@ -326,6 +485,8 @@
             input.type = 'number'; input.id = `test-answer-input-${index}`; input.classList.add('input-box');
             input.setAttribute('data-problem-index', index);
             input.setAttribute('aria-label', `Odpowiedź do zadania ${index + 1}`);
+             // Save state on test input change (optional)
+            // input.addEventListener('input', saveState);
             return input;
         }
 
@@ -334,15 +495,19 @@
             for (let i = 0; i < NUM_TEST_PROBLEMS; i++) {
                 testProblemsData.push(generateSingleProblemData());
             }
-            displayTestProblems();
+            testAnswersChecked = false; // Reset checked state
+            displayTestProblems(); // Display empty problems
             testScoreAreaDiv.innerHTML = '';
             testCheckButton.disabled = false;
             testNewButton.disabled = true; // Disable "New Test" until checked
-            testAnswersChecked = false;
+            saveState(); // Save the new test state (empty answers)
         }
 
-         function displayTestProblems() {
+         // Modified to accept and populate saved answers
+         function displayTestProblems(savedAnswers = {}) {
             testProblemsListDiv.innerHTML = '';
+            if (!testProblemsData || testProblemsData.length === 0) return; // Don't display if no data
+
             testProblemsData.forEach((problem, index) => {
                 const itemDiv = document.createElement('div');
                 itemDiv.classList.add('test-problem-item');
@@ -356,9 +521,19 @@
                 equationContainer.classList.add('test-equation-container');
                 const { num1, num2, result, operator, unknownPosition } = problem;
 
-                if (unknownPosition === 0) { equationContainer.appendChild(createTestInputBox(index)); equationContainer.appendChild(createBox(operator, 'operator')); equationContainer.appendChild(createBox(num2)); equationContainer.appendChild(createBox('=', 'operator')); equationContainer.appendChild(createBox(result)); }
-                else if (unknownPosition === 1) { equationContainer.appendChild(createBox(num1)); equationContainer.appendChild(createBox(operator, 'operator')); equationContainer.appendChild(createTestInputBox(index)); equationContainer.appendChild(createBox('=', 'operator')); equationContainer.appendChild(createBox(result)); }
-                else { equationContainer.appendChild(createBox(num1)); equationContainer.appendChild(createBox(operator, 'operator')); equationContainer.appendChild(createBox(num2)); equationContainer.appendChild(createBox('=', 'operator')); equationContainer.appendChild(createTestInputBox(index)); }
+                let inputBox; // Define inputBox variable
+
+                if (unknownPosition === 0) { inputBox = createTestInputBox(index); equationContainer.appendChild(inputBox); equationContainer.appendChild(createBox(operator, 'operator')); equationContainer.appendChild(createBox(num2)); equationContainer.appendChild(createBox('=', 'operator')); equationContainer.appendChild(createBox(result)); }
+                else if (unknownPosition === 1) { equationContainer.appendChild(createBox(num1)); equationContainer.appendChild(createBox(operator, 'operator')); inputBox = createTestInputBox(index); equationContainer.appendChild(inputBox); equationContainer.appendChild(createBox('=', 'operator')); equationContainer.appendChild(createBox(result)); }
+                else { equationContainer.appendChild(createBox(num1)); equationContainer.appendChild(createBox(operator, 'operator')); equationContainer.appendChild(createBox(num2)); equationContainer.appendChild(createBox('=', 'operator')); inputBox = createTestInputBox(index); equationContainer.appendChild(inputBox); }
+
+                // Populate input value from saved state if available
+                 if (savedAnswers[index] !== undefined) {
+                     const currentInputBox = equationContainer.querySelector(`#test-answer-input-${index}`);
+                     if(currentInputBox) {
+                        currentInputBox.value = savedAnswers[index];
+                     }
+                 }
 
                 itemDiv.appendChild(equationContainer);
                 testProblemsListDiv.appendChild(itemDiv);
@@ -381,6 +556,8 @@
 
         function checkTestAnswers() {
             if (testAnswersChecked) return;
+             if (testProblemsData.length === 0) return; // Don't check if no problems
+
             let score = 0;
             testProblemsData.forEach((problem, index) => {
                 const inputElement = document.getElementById(`test-answer-input-${index}`);
@@ -393,27 +570,37 @@
                     inputElement.classList.add('correct');
                 } else {
                     inputElement.classList.add('incorrect');
-                     // Optionally show correct answer on hover or next to it
-                    // inputElement.title = `Poprawna: ${problem.correctAnswer}`;
                 }
                 inputElement.disabled = true;
             });
 
+            testAnswersChecked = true; // Set checked flag
             const grade = calculateGrade(score, NUM_TEST_PROBLEMS);
             testScoreAreaDiv.innerHTML = `Twój wynik: ${score} na ${NUM_TEST_PROBLEMS}.<br>Ocena: <span class="grade">${grade}</span>`;
             testCheckButton.disabled = true;
             testNewButton.disabled = false; // Enable "New Test" button
-            testAnswersChecked = true;
+            saveState(); // Save final test state (checked, scored)
         }
 
         testCheckButton.addEventListener('click', checkTestAnswers);
-        testNewButton.addEventListener('click', generateTestProblems);
+        testNewButton.addEventListener('click', generateTestProblems); // Regenerates and saves state
 
         // --- Initial Load ---
-        // Start with the practice tab active and generate the first problem
         window.onload = () => {
-             document.querySelector('.tab-button[data-tab="practice-tab"]').click(); // Simulate click on practice tab
-             generatePracticeProblem(); // Generate initial practice problem
+            const loaded = loadState(); // Try to load state first
+            if (!loaded) {
+                 // If no state was loaded, initialize default view manually
+                 const defaultTabId = 'practice-tab';
+                 tabButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.getAttribute('data-tab') === defaultTabId);
+                 });
+                 tabContents.forEach(content => {
+                    content.classList.toggle('active', content.id === defaultTabId);
+                 });
+                 generatePracticeProblem(); // Generate initial practice problem
+                 // Don't save state here, let user interaction trigger first save
+            }
+            // State loaded handles visibility via active class, no extra steps needed here.
         };
 
     </script>
