@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematyka dla Dzieci - Nauka</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Use Inter font */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f9ff; /* Light blue background */
+        }
+        /* Style for the equation container */
+        #equation {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* flex-wrap: wrap; */ /* REMOVED: Prevent wrapping */
+            overflow-x: auto; /* Add scroll if absolutely needed, but aim to fit */
+            padding-bottom: 5px; /* Add padding for scrollbar if it appears */
+            margin-bottom: 1.5rem; /* 24px */
+            min-height: 60px; /* Ensure consistent height */
+        }
+        /* Style for the number boxes - FIXED WIDTH (Smaller) */
+        .number-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0; /* Prevent shrinking */
+            width: 52px;  /* UPDATED: Fixed width (Smaller) */
+            height: 52px; /* UPDATED: Fixed height (Smaller) */
+            padding: 0 6px; /* Adjusted padding */
+            border: 2px solid #93c5fd; /* Blue border */
+            border-radius: 0.5rem; /* 8px */
+            font-size: 1.25rem; /* UPDATED: Smaller font */
+            font-weight: 600;
+            text-align: center;
+            background-color: #ffffff;
+            margin: 2px; /* UPDATED: Smaller margin */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        /* Style for the operator box */
+        .operator-box {
+             display: inline-flex;
+            align-items: center;
+            justify-content: center;
+             flex-shrink: 0; /* Prevent shrinking */
+            min-width: 25px; /* UPDATED: Smaller min-width */
+            height: 52px; /* UPDATED: Consistent height */
+            padding: 0 2px; /* UPDATED: Smaller padding */
+            font-size: 1.5rem; /* UPDATED: Slightly smaller operator */
+            font-weight: normal;
+            text-align: center;
+            margin: 2px; /* UPDATED: Smaller margin */
+        }
+        /* Style for the input box - FIXED WIDTH (Smaller) */
+        .input-box {
+            flex-shrink: 0; /* Prevent shrinking */
+            width: 52px; /* UPDATED: Fixed width - same as number-box */
+            height: 52px; /* UPDATED: Fixed height - same as number-box */
+            border: 2px dashed #fbbf24; /* Dashed amber border */
+            border-radius: 0.5rem; /* 8px */
+            font-size: 1.25rem; /* UPDATED: Smaller font */
+            font-weight: 600;
+            text-align: center;
+            margin: 2px; /* UPDATED: Smaller margin */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            -moz-appearance: textfield;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+        .input-box::-webkit-outer-spin-button,
+        .input-box::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+         /* Input box feedback styles */
+        .input-box.correct {
+            border-color: #16a34a; /* Green border */
+            border-style: solid;
+            background-color: #f0fdf4; /* Light green background */
+        }
+        .input-box.incorrect {
+            border-color: #dc2626; /* Red border */
+            border-style: solid;
+             background-color: #fef2f2; /* Light red background */
+        }
+        /* Button styles */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 0.5rem; /* 8px */
+            font-size: 1rem; /* 16px */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: none;
+            width: 100%; /* Full width on small screens */
+        }
+        @media (min-width: 640px) { /* sm breakpoint */
+            .btn {
+                width: auto; /* Auto width on larger screens */
+            }
+        }
+        .btn-primary {
+            background-color: #2563eb; color: white;
+        }
+        .btn-primary:hover:not(:disabled) { background-color: #1d4ed8; }
+        .btn-primary:disabled { background-color: #9ca3af; cursor: not-allowed; }
+        .btn-secondary { background-color: #fbbf24; color: #422006; }
+        .btn-secondary:hover:not(:disabled) { background-color: #f59e0b; }
+         .btn-secondary:disabled { background-color: #d1d5db; color: #6b7280; cursor: not-allowed;}
+        .btn:active:not(:disabled) { transform: scale(0.98); }
+        /* Feedback area style */
+        #feedback {
+            margin-top: 1rem; /* 16px */
+            margin-bottom: 1.5rem; /* 24px */
+            min-height: 50px; /* Reserve space for feedback/explanation */
+            font-size: 1rem; /* 16px */
+            font-weight: 600;
+            text-align: center;
+        }
+        .feedback-correct {
+            color: #16a34a; /* Green */
+        }
+        .feedback-incorrect {
+            color: #dc2626; /* Red */
+        }
+        .explanation {
+            font-size: 0.9rem; /* 14.4px */
+            color: #4b5563; /* Darker gray */
+            font-weight: normal;
+            margin-top: 0.5rem; /* 8px */
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-6 md:p-8 rounded-lg shadow-xl max-w-lg w-full text-center">
+        <h1 class="text-2xl md:text-3xl font-bold mb-6 text-blue-700">Matematyczna Przygoda!</h1>
+        <p class="text-gray-600 mb-6">Wpisz brakującą liczbę:</p>
+
+        <div id="equation">
+            </div>
+
+        <div id="feedback"></div>
+
+        <div class="flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-4">
+            <button id="check-button" class="btn btn-primary">Sprawdź</button>
+            <button id="new-button" class="btn btn-secondary">Następne zadanie</button>
+        </div>
+    </div>
+
+    <script>
+        const equationDiv = document.getElementById('equation');
+        const feedbackDiv = document.getElementById('feedback');
+        const checkButton = document.getElementById('check-button');
+        const newButton = document.getElementById('new-button');
+
+        let currentProblem = {}; // Object to store data for the current problem
+
+        // Function to generate a random integer between min and max (inclusive)
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // Function to create a number box element
+        function createBox(content, type = 'number') {
+            const box = document.createElement('div');
+            box.textContent = content;
+            box.classList.add(type === 'operator' ? 'operator-box' : 'number-box');
+            return box;
+        }
+
+        // Function to create the input box element
+        function createInputBox() {
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.id = 'answer-input';
+            input.classList.add('input-box');
+            input.setAttribute('aria-label', 'Wpisz brakującą liczbę');
+            // Add event listener for Enter key
+            input.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); // Prevent default Enter behavior
+                    if (!checkButton.disabled) { // Only check if button is enabled
+                       checkAnswer();
+                    }
+                }
+            });
+            return input;
+        }
+
+        // Function to generate data for a single math problem
+        function generateProblemData() {
+            let num1, num2, result, operator, correctAnswer, unknownPosition;
+            let isValid = false;
+            // Loop until a valid problem (all numbers >= 10) is generated
+            while (!isValid) {
+                const operationType = getRandomInt(0, 1); // 0 for addition, 1 for subtraction
+                unknownPosition = getRandomInt(0, 2); // 0 for first number, 1 for second, 2 for result
+                isValid = true; // Assume valid initially
+
+                if (operationType === 0) { // Addition: a + b = c
+                    operator = '+';
+                    if (unknownPosition === 0) { // x + b = c
+                        num2 = getRandomInt(10, 89);
+                        result = getRandomInt(num2 + 10, 100);
+                        num1 = result - num2;
+                        if (num1 < 10) { isValid = false; continue; }
+                        correctAnswer = num1;
+                    } else if (unknownPosition === 1) { // a + x = c
+                        num1 = getRandomInt(10, 89);
+                        result = getRandomInt(num1 + 10, 100);
+                        num2 = result - num1;
+                        if (num2 < 10) { isValid = false; continue; }
+                        correctAnswer = num2;
+                    } else { // a + b = x
+                        num1 = getRandomInt(10, 89);
+                        num2 = getRandomInt(10, 100 - num1);
+                        result = num1 + num2;
+                         if (result < 10 || result > 100) { isValid = false; continue; }
+                        correctAnswer = result;
+                    }
+                } else { // Subtraction: a - b = c
+                    operator = '-';
+                    if (unknownPosition === 0) { // x - b = c
+                        num2 = getRandomInt(10, 89);
+                        result = getRandomInt(10, 100 - num2);
+                        num1 = result + num2;
+                         if (num1 < 10 || num1 > 100) { isValid = false; continue; }
+                        correctAnswer = num1;
+                    } else if (unknownPosition === 1) { // a - x = c
+                        num1 = getRandomInt(20, 100);
+                        result = getRandomInt(10, num1 - 10);
+                        num2 = num1 - result;
+                        if (num2 < 10) { isValid = false; continue; }
+                        correctAnswer = num2;
+                    } else { // a - b = x
+                        num1 = getRandomInt(20, 100);
+                        num2 = getRandomInt(10, num1 - 10);
+                        result = num1 - num2;
+                        if (result < 10) { isValid = false; continue; }
+                        correctAnswer = result;
+                    }
+                }
+            } // End while loop
+            return { num1, num2, result, operator, correctAnswer, unknownPosition };
+        }
+
+         // Function to generate the explanation text
+        function generateExplanation(problem) {
+            const { num1, num2, result, operator, correctAnswer, unknownPosition } = problem;
+            let explanationText = '';
+            switch (unknownPosition) {
+                case 0: // x + b = c  OR  x - b = c
+                    explanationText = operator === '+'
+                        ? `Aby znaleźć brakującą liczbę (x), musisz od wyniku (${result}) odjąć znaną liczbę (${num2}). Działanie: ${result} - ${num2} = ${correctAnswer}.`
+                        : `Aby znaleźć brakującą liczbę (x), musisz do wyniku (${result}) dodać liczbę, którą odejmujemy (${num2}). Działanie: ${result} + ${num2} = ${correctAnswer}.`;
+                    break;
+                case 1: // a + x = c  OR  a - x = c
+                     explanationText = operator === '+'
+                        ? `Aby znaleźć brakującą liczbę (x), musisz od wyniku (${result}) odjąć pierwszą liczbę (${num1}). Działanie: ${result} - ${num1} = ${correctAnswer}.`
+                        : `Aby znaleźć brakującą liczbę (x), musisz od pierwszej liczby (${num1}) odjąć wynik (${result}). Działanie: ${num1} - ${result} = ${correctAnswer}.`;
+                    break;
+                case 2: // a + b = x  OR  a - b = x
+                     explanationText = operator === '+'
+                        ? `Aby znaleźć wynik (x), dodaj ${num1} i ${num2}. Działanie: ${num1} + ${num2} = ${correctAnswer}.`
+                        : `Aby znaleźć wynik (x), odejmij ${num2} od ${num1}. Działanie: ${num1} - ${num2} = ${correctAnswer}.`;
+                    break;
+            }
+            // Removed the "Poprawna odpowiedź to..." part from here as it's implicit
+            return `<div class="explanation">💡 ${explanationText}</div>`;
+        }
+
+        // Function to generate and display a new math problem
+        function generateProblem() {
+            currentProblem = generateProblemData(); // Generate data for the new problem
+
+            feedbackDiv.innerHTML = ''; // Clear previous feedback
+            equationDiv.innerHTML = ''; // Clear previous equation
+
+            const { num1, num2, result, operator, unknownPosition } = currentProblem;
+
+             // Assemble the equation based on unknown position
+            if (unknownPosition === 0) {
+                equationDiv.appendChild(createInputBox());
+                equationDiv.appendChild(createBox(operator, 'operator'));
+                equationDiv.appendChild(createBox(num2));
+                equationDiv.appendChild(createBox('=', 'operator'));
+                equationDiv.appendChild(createBox(result));
+            } else if (unknownPosition === 1) {
+                equationDiv.appendChild(createBox(num1));
+                equationDiv.appendChild(createBox(operator, 'operator'));
+                equationDiv.appendChild(createInputBox());
+                equationDiv.appendChild(createBox('=', 'operator'));
+                equationDiv.appendChild(createBox(result));
+            } else { // unknownPosition === 2
+                equationDiv.appendChild(createBox(num1));
+                equationDiv.appendChild(createBox(operator, 'operator'));
+                equationDiv.appendChild(createBox(num2));
+                equationDiv.appendChild(createBox('=', 'operator'));
+                equationDiv.appendChild(createInputBox());
+            }
+
+            // Set initial button states
+            checkButton.disabled = false;
+            newButton.disabled = true;
+
+             // Focus the input box
+            const inputElement = document.getElementById('answer-input');
+            if (inputElement) {
+                inputElement.value = ''; // Clear previous input value
+                inputElement.focus();
+                 inputElement.disabled = false; // Ensure input is enabled
+                 inputElement.classList.remove('correct', 'incorrect'); // Clear styling
+            }
+        }
+
+        // Function to check the user's answer
+        function checkAnswer() {
+            const inputElement = document.getElementById('answer-input');
+            const userAnswer = parseInt(inputElement.value, 10);
+
+            feedbackDiv.innerHTML = ''; // Clear previous messages
+            inputElement.classList.remove('correct', 'incorrect'); // Clear input styling
+
+            if (isNaN(userAnswer)) {
+                feedbackDiv.textContent = 'Proszę wpisać liczbę!';
+                feedbackDiv.className = 'feedback-incorrect'; // Use incorrect style for warning
+                return; // Stop checking if input is invalid
+            }
+
+            if (userAnswer === currentProblem.correctAnswer) {
+                feedbackDiv.textContent = 'Świetnie! Dobra odpowiedź! 🎉';
+                feedbackDiv.className = 'feedback-correct'; // Add green color class
+                inputElement.classList.add('correct');
+            } else {
+                // Display incorrect feedback and the explanation
+                feedbackDiv.innerHTML = `<span class="feedback-incorrect">Niestety, to nie ta liczba. Prawidłowa odpowiedź to ${currentProblem.correctAnswer}.</span> ${generateExplanation(currentProblem)}`;
+                 inputElement.classList.add('incorrect');
+            }
+
+            // Update button states after checking
+            checkButton.disabled = true;
+            newButton.disabled = false;
+            inputElement.disabled = true; // Disable input after checking
+        }
+
+        // Event listeners for buttons
+        checkButton.addEventListener('click', checkAnswer);
+        newButton.addEventListener('click', generateProblem);
+
+        // Generate the first problem when the page loads
+        window.onload = generateProblem;
+
+    </script>
+</body>
+</html>
