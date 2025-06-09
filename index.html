@@ -3,606 +3,661 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matematyka dla Dzieci - dodawanie i odejmowanie</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Geometria - Nauka Kątów i Figur</title>
     <style>
-        /* Use Inter font */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f9ff; /* Light blue background */
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 50%, #6c5ce7 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
-        /* Tab styles */
-        .tab-button {
-            padding: 10px 20px;
-            cursor: pointer;
-            border: none;
-            background-color: #e0e7ff; /* Light indigo */
-            color: #3730a3; /* Dark indigo */
+
+        main {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3436;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #problem-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 3px solid #74b9ff;
+        }
+
+        .figure-display {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 2px dashed #74b9ff;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .figure-info {
+            font-size: 1.3em;
+            color: #2d3436;
+            font-weight: bold;
+        }
+
+        .question {
+            font-size: 1.4em;
+            color: #2d3436;
+            margin-bottom: 20px;
+            line-height: 1.5;
             font-weight: 600;
-            border-radius: 0.5rem 0.5rem 0 0; /* Rounded top corners */
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        .tab-button.active {
-            background-color: #ffffff; /* White */
-            color: #1d4ed8; /* Blue */
-            /* Use border instead of box-shadow for active indicator if preferred */
-            border-bottom: 2px solid #1d4ed8;
-        }
-         .tab-button:not(.active):hover {
-             background-color: #c7d2fe; /* Lighter indigo on hover */
-        }
-        .tab-content {
-            display: none; /* Hide content by default */
-            background-color: #ffffff;
-            padding: 1.5rem; /* 24px */
-            border-radius: 0 0 0.5rem 0.5rem; /* Rounded bottom corners */
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        }
-        .tab-content.active {
-            display: block; /* Show active content based on class */
         }
 
-        /* --- Styles common to both tabs --- */
-        .number-box {
-            display: inline-flex; align-items: center; justify-content: center;
-            flex-shrink: 0; width: 52px; height: 52px; padding: 0 6px;
-            border: 2px solid #93c5fd; border-radius: 0.5rem;
-            font-size: 1.25rem; font-weight: 600; text-align: center;
-            background-color: #ffffff; margin: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        .answer-section {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
         }
-        .operator-box {
-            display: inline-flex; align-items: center; justify-content: center;
-            flex-shrink: 0; min-width: 25px; height: 52px; padding: 0 2px;
-            font-size: 1.5rem; font-weight: normal; text-align: center; margin: 2px;
-        }
-        .input-box {
-            flex-shrink: 0; width: 52px; height: 52px;
-            border: 2px dashed #fbbf24; border-radius: 0.5rem;
-            font-size: 1.25rem; font-weight: 600; text-align: center; margin: 2px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); -moz-appearance: textfield;
-            transition: border-color 0.3s ease, background-color 0.3s ease;
-        }
-        .input-box::-webkit-outer-spin-button, .input-box::-webkit-inner-spin-button {
-            -webkit-appearance: none; margin: 0;
-        }
-        .input-box.correct {
-            border-color: #16a34a; border-style: solid; background-color: #f0fdf4;
-        }
-        .input-box.incorrect {
-            border-color: #dc2626; border-style: solid; background-color: #fef2f2;
-        }
-        .btn {
-            padding: 10px 20px; border-radius: 0.5rem; font-size: 1rem; font-weight: 600;
-            cursor: pointer; transition: background-color 0.3s ease, transform 0.1s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: none; width: 100%;
-        }
-        @media (min-width: 640px) { .btn { width: auto; } }
-        .btn-primary { background-color: #2563eb; color: white; }
-        .btn-primary:hover:not(:disabled) { background-color: #1d4ed8; }
-        .btn-primary:disabled { background-color: #9ca3af; cursor: not-allowed; }
-        .btn-secondary { background-color: #fbbf24; color: #422006; }
-        .btn-secondary:hover:not(:disabled) { background-color: #f59e0b; }
-        .btn-secondary:disabled { background-color: #d1d5db; color: #6b7280; cursor: not-allowed;}
-        .btn:active:not(:disabled) { transform: scale(0.98); }
 
-        /* --- Practice Tab Specific Styles --- */
-        #practice-equation {
-            display: flex; align-items: center; justify-content: center;
-            overflow-x: auto; padding-bottom: 5px; margin-bottom: 1.5rem; min-height: 60px;
+        #answer-input {
+            font-size: 1.5em;
+            padding: 12px 20px;
+            border: 3px solid #74b9ff;
+            border-radius: 10px;
+            width: 150px;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s ease;
         }
-        #practice-feedback {
-            margin-top: 1rem; margin-bottom: 1.5rem; min-height: 50px;
-            font-size: 1rem; font-weight: 600; text-align: center;
-        }
-        .feedback-correct { color: #16a34a; }
-        .feedback-incorrect { color: #dc2626; }
-        .explanation { font-size: 0.9rem; color: #4b5563; font-weight: normal; margin-top: 0.5rem; }
 
-        /* --- Test Tab Specific Styles --- */
-        #test-problems-list { margin-bottom: 1.5rem; space-y-2; }
-        .test-problem-item {
-            display: flex; align-items: center; padding: 5px 0;
-            border-bottom: 1px solid #e0e7ff;
+        #answer-input:focus {
+            border-color: #0984e3;
+            box-shadow: 0 0 10px rgba(116, 185, 255, 0.5);
+            transform: scale(1.05);
         }
-         .test-problem-item:last-child { border-bottom: none; }
-        .test-problem-index {
-            font-weight: bold; margin-right: 10px; color: #6b7280;
-            min-width: 25px; text-align: right;
-        }
-        .test-equation-container {
-            display: flex; align-items: center; flex-grow: 1; flex-wrap: nowrap; /* Ensure no wrap */
-            overflow-x: auto; /* Scroll if needed, but aim to fit */
-        }
-        #test-score-area {
-            margin-top: 1.5rem; margin-bottom: 1.5rem; min-height: 50px;
-            font-size: 1.25rem; font-weight: 700; text-align: center; color: #1d4ed8;
-        }
-        .grade { font-size: 1.5rem; font-weight: bold; } /* Style for the grade */
 
+        #check-btn {
+            font-size: 1.3em;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #00b894, #00a085);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+        }
+
+        #check-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 184, 148, 0.4);
+        }
+
+        #check-btn:active {
+            transform: translateY(0);
+        }
+
+        #feedback {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            transition: all 0.5s ease;
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        #feedback.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        #feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        #stats-container {
+            background: #e8f4fd;
+            border-radius: 15px;
+            padding: 25px;
+            border: 3px solid #74b9ff;
+        }
+
+        #stats-container h2 {
+            color: #2d3436;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #stats-list {
+            list-style: none;
+            font-size: 1.2em;
+            color: #2d3436;
+        }
+
+        #stats-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #stats-list li:last-child {
+            border-bottom: none;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #0984e3;
+        }
+
+        .unit {
+            font-size: 0.9em;
+            color: #74b9ff;
+            margin-left: 5px;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .bounce {
+            animation: bounce 1s;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            main {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+                margin-bottom: 20px;
+            }
+            
+            #problem-container {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .figure-display {
+                padding: 15px;
+                min-height: 100px;
+            }
+            
+            .figure-info {
+                font-size: 1.1em;
+            }
+            
+            .question {
+                font-size: 1.2em;
+                margin-bottom: 15px;
+            }
+            
+            .answer-section {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            #answer-input {
+                width: 100%;
+                max-width: 200px;
+                font-size: 1.3em;
+                padding: 10px 15px;
+            }
+            
+            #check-btn {
+                font-size: 1.1em;
+                padding: 10px 20px;
+                width: 100%;
+                max-width: 200px;
+            }
+            
+            #feedback {
+                font-size: 1.3em;
+                padding: 12px;
+            }
+            
+            #stats-container {
+                padding: 20px;
+            }
+            
+            #stats-container h2 {
+                font-size: 1.5em;
+                margin-bottom: 15px;
+            }
+            
+            #stats-list {
+                font-size: 1.1em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            main {
+                padding: 15px;
+                margin: 5px;
+            }
+            
+            h1 {
+                font-size: 1.7em;
+                margin-bottom: 15px;
+            }
+            
+            #problem-container {
+                padding: 15px;
+            }
+            
+            .question {
+                font-size: 1.1em;
+                line-height: 1.4;
+            }
+            
+            #answer-input {
+                font-size: 1.2em;
+                padding: 8px 12px;
+            }
+            
+            #check-btn {
+                font-size: 1em;
+                padding: 8px 15px;
+            }
+            
+            #feedback {
+                font-size: 1.2em;
+                padding: 10px;
+            }
+            
+            #stats-container {
+                padding: 15px;
+            }
+            
+            #stats-container h2 {
+                font-size: 1.3em;
+            }
+            
+            #stats-list {
+                font-size: 1em;
+            }
+            
+            #stats-list li {
+                padding: 6px 0;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            body {
+                padding: 5px;
+            }
+            
+            main {
+                padding: 10px;
+                border-radius: 15px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            #problem-container {
+                padding: 12px;
+                border-radius: 12px;
+            }
+            
+            .figure-display {
+                padding: 12px;
+                min-height: 80px;
+            }
+            
+            .question {
+                font-size: 1em;
+            }
+            
+            #answer-input {
+                font-size: 1.1em;
+            }
+            
+            #check-btn {
+                font-size: 0.9em;
+            }
+        }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
-    <div class="max-w-2xl w-full">
-        <h1 class="text-2xl md:text-3xl font-bold mb-6 text-blue-700 text-center">Matematyczna przygoda!</h1>
-
-        <div class="flex border-b border-gray-300 mb-[-1px]">
-            <button class="tab-button active" data-tab="practice-tab">Ćwiczenia</button>
-            <button class="tab-button" data-tab="test-tab">Sprawdzian</button>
-        </div>
-
-        <div>
-            <div id="practice-tab" class="tab-content active">
-                <p class="text-gray-600 mb-6 text-center">Rozwiązuj zadania i ucz się krok po kroku.</p>
-                <div id="practice-equation"></div>
-                <div id="practice-feedback"></div>
-                <div class="flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                    <button id="practice-check-button" class="btn btn-primary">Sprawdź</button>
-                    <button id="practice-new-button" class="btn btn-secondary">Następne zadanie</button>
+<body>
+    <main>
+        <h1>🔷 Geometria - Nauka Kątów 🔷</h1>
+        
+        <section id="problem-container">
+            <div class="figure-display">
+                <div class="figure-info" id="figure-info">
+                    Załaduj zadanie...
                 </div>
             </div>
-
-            <div id="test-tab" class="tab-content">
-                <p class="text-gray-600 mb-6 text-center">Rozwiąż 12 zadań, aby sprawdzić swoją wiedzę.</p>
-                <div id="test-problems-list"></div>
-                <div id="test-score-area"></div>
-                 <div class="flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                    <button id="test-check-button" class="btn btn-primary">Poznaj wynik</button>
-                    <button id="test-new-button" class="btn btn-secondary">Nowy sprawdzian</button>
-                </div>
+            
+            <div class="question" id="question">
+                Kliknij "Sprawdź", żeby rozpocząć!
             </div>
-        </div>
-    </div>
+            
+            <div class="answer-section">
+                <input type="number" id="answer-input" placeholder="Wpisz odpowiedź" min="0" max="360">
+                <span class="unit">°</span>
+                <button id="check-btn">Sprawdź odpowiedź</button>
+            </div>
+            
+            <div id="feedback"></div>
+        </section>
+        
+        <section id="stats-container">
+            <h2>📊 Statystyki</h2>
+            <ul id="stats-list">
+                <li>
+                    <span>Rozwiązane zadania:</span>
+                    <span class="stat-value" id="total-count">0</span>
+                </li>
+                <li>
+                    <span>Poprawne odpowiedzi:</span>
+                    <span class="stat-value" id="correct-count">0</span>
+                </li>
+                <li>
+                    <span>Skuteczność:</span>
+                    <span class="stat-value" id="accuracy">0%</span>
+                </li>
+            </ul>
+        </section>
+    </main>
 
     <script>
-        // --- Common Elements & Variables ---
-        const tabButtons = document.querySelectorAll('.tab-button');
-        const tabContents = document.querySelectorAll('.tab-content');
-        const NUM_TEST_PROBLEMS = 12;
-        const STORAGE_KEY = 'mathAppState'; // Key for localStorage
-
-        // --- Common Helper Functions ---
-        function getRandomInt(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
-
-        function createBox(content, type = 'number') {
-            const box = document.createElement('div');
-            box.textContent = content;
-            box.classList.add(type === 'operator' ? 'operator-box' : 'number-box');
-            return box;
-        }
-
-        // --- State Management (localStorage) ---
-        function saveState() {
-            const practiceInputElement = document.getElementById('practice-answer-input');
-            const testAnswers = {};
-            // Only attempt to read test answers if the test tab elements exist
-            if (document.getElementById('test-problems-list')) {
-                 testProblemsData.forEach((_, index) => {
-                    const inputElement = document.getElementById(`test-answer-input-${index}`);
-                    if (inputElement) {
-                        testAnswers[index] = inputElement.value;
-                    }
-                });
+        // Baza zadań geometrycznych
+        const problems = [
+            // Trójkąty
+            {
+                id: 1,
+                figure_type: "trójkąt",
+                figure_description: "🔺 Trójkąt ABC",
+                question: "W trójkącie suma wszystkich kątów wynosi zawsze tyle samo. Ile to stopni?",
+                correct_answer: 180
+            },
+            {
+                id: 2,
+                figure_type: "trójkąt równoboczny",
+                figure_description: "🔺 Trójkąt równoboczny DEF",
+                question: "W trójkącie równobocznym wszystkie kąty są równe. Jaka jest miara każdego kąta?",
+                correct_answer: 60
+            },
+            {
+                id: 3,
+                figure_type: "trójkąt",
+                figure_description: "🔺 Trójkąt GHI",
+                question: "W trójkącie kąt G = 90°, a kąt H = 45°. Jaka jest miara kąta I?",
+                correct_answer: 45
+            },
+            {
+                id: 4,
+                figure_type: "trójkąt równoramienny",
+                figure_description: "🔺 Trójkąt równoramienny JKL",
+                question: "W trójkącie równoramiennym kąt przy podstawie wynosi 70°. Jaka jest miara kąta przy wierzchołku?",
+                correct_answer: 40
+            },
+            
+            // Równoległoboki
+            {
+                id: 5,
+                figure_type: "równoległobok",
+                figure_description: "◇ Równoległobok ABCD",
+                question: "W równoległoboku kąt A = 70°. Jaka jest miara kąta B (sąsiedniego)?",
+                correct_answer: 110
+            },
+            {
+                id: 6,
+                figure_type: "równoległobok",
+                figure_description: "◇ Równoległobok EFGH",
+                question: "W równoległoboku kąt E = 120°. Jaka jest miara kąta G (przeciwległego)?",
+                correct_answer: 120
+            },
+            {
+                id: 7,
+                figure_type: "równoległobok",
+                figure_description: "◇ Równoległobok PQRS",
+                question: "W równoległoboku kąt P = 55°. Jaka jest miara kąta Q?",
+                correct_answer: 125
+            },
+            
+            // Romby
+            {
+                id: 8,
+                figure_type: "romb",
+                figure_description: "♦ Romb ABCD",
+                question: "W rombie kąt ostry wynosi 60°. Jaka jest miara kąta rozwartego?",
+                correct_answer: 120
+            },
+            {
+                id: 9,
+                figure_type: "romb",
+                figure_description: "♦ Romb KLMN",
+                question: "W rombie jeden z kątów wynosi 80°. Jaka jest miara kąta do niego sąsiedniego?",
+                correct_answer: 100
+            },
+            
+            // Trapezy
+            {
+                id: 10,
+                figure_type: "trapez",
+                figure_description: "⬟ Trapez ABCD",
+                question: "W trapezie kąt przy jednym końcu podstawy wynosi 70°. Jaki jest kąt przy tym samym ramieniu (suma = 180°)?",
+                correct_answer: 110
+            },
+            {
+                id: 11,
+                figure_type: "trapez równoramienny",
+                figure_description: "⬟ Trapez równoramienny EFGH",
+                question: "W trapezie równoramiennym kąt przy podstawie większej wynosi 65°. Jaki jest kąt przy podstawie mniejszej?",
+                correct_answer: 115
+            },
+            
+            // Dodatkowe zadania
+            {
+                id: 12,
+                figure_type: "trójkąt",
+                figure_description: "🔺 Trójkąt prostokątny",
+                question: "W trójkącie prostokątnym jeden z kątów ostrych wynosi 30°. Jaki jest drugi kąt ostry?",
+                correct_answer: 60
+            },
+            {
+                id: 13,
+                figure_type: "czworokąt",
+                figure_description: "⬜ Dowolny czworokąt",
+                question: "Suma wszystkich kątów w każdym czworokącie wynosi zawsze tyle samo. Ile to stopni?",
+                correct_answer: 360
+            },
+            {
+                id: 14,
+                figure_type: "równoległobok",
+                figure_description: "◇ Równoległobok WXYZ",
+                question: "W równoległoboku kąt W = 45°. Jaka jest miara kąta X?",
+                correct_answer: 135
+            },
+            {
+                id: 15,
+                figure_type: "trójkąt",
+                figure_description: "🔺 Trójkąt ABC",
+                question: "W trójkącie kąt A = 50°, kąt B = 80°. Jaka jest miara kąta C?",
+                correct_answer: 50
             }
+        ];
 
-            const state = {
-                activeTab: document.querySelector('.tab-button.active')?.getAttribute('data-tab') || 'practice-tab',
-                practice: {
-                    problem: currentPracticeProblem,
-                    feedback: practiceFeedbackDiv.innerHTML,
-                    checkDisabled: practiceCheckButton.disabled,
-                    newDisabled: practiceNewButton.disabled,
-                    inputValue: practiceInputElement ? practiceInputElement.value : '',
-                    inputDisabled: practiceInputElement ? practiceInputElement.disabled : false,
-                    inputClasses: practiceInputElement ? [...practiceInputElement.classList] : [] // Save styling classes
-                },
-                test: {
-                    problems: testProblemsData,
-                    answers: testAnswers, // Save collected answers
-                    checked: testAnswersChecked,
-                    scoreHTML: testScoreAreaDiv.innerHTML,
-                    checkDisabled: testCheckButton.disabled,
-                    newDisabled: testNewButton.disabled
-                }
-            };
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-                // console.log("State saved:", state); // Debugging line
-            } catch (e) {
-                console.error("Error saving state to localStorage:", e);
-            }
-        }
+        // Zmienne globalne
+        let currentProblem = null;
+        let lastProblemId = null;
+        let stats = { total: 0, correct: 0 };
 
-        function loadState() {
-            try {
-                const savedStateString = localStorage.getItem(STORAGE_KEY);
-                if (!savedStateString) {
-                    // console.log("No saved state found."); // Debugging line
-                    return false; // No saved state
-                }
+        // Elementy DOM
+        const figureInfo = document.getElementById('figure-info');
+        const questionElement = document.getElementById('question');
+        const answerInput = document.getElementById('answer-input');
+        const checkBtn = document.getElementById('check-btn');
+        const feedback = document.getElementById('feedback');
+        const totalCount = document.getElementById('total-count');
+        const correctCount = document.getElementById('correct-count');
+        const accuracy = document.getElementById('accuracy');
 
-                const state = JSON.parse(savedStateString);
-                if (!state) {
-                     // console.log("Invalid saved state found."); // Debugging line
-                    return false; // Invalid state
-                }
-                 // console.log("State loaded:", state); // Debugging line
-
-                // Restore Active Tab - Crucially, only add/remove classes
-                const activeTabId = state.activeTab || 'practice-tab';
-                tabButtons.forEach(btn => {
-                    btn.classList.toggle('active', btn.getAttribute('data-tab') === activeTabId);
-                });
-                tabContents.forEach(content => {
-                    content.classList.toggle('active', content.id === activeTabId);
-                });
-
-
-                // Restore Practice State
-                if (state.practice && state.practice.problem && Object.keys(state.practice.problem).length > 0) {
-                    currentPracticeProblem = state.practice.problem;
-                    renderPracticeProblem(currentPracticeProblem); // Re-render based on data
-                    practiceFeedbackDiv.innerHTML = state.practice.feedback || '';
-                    practiceCheckButton.disabled = state.practice.checkDisabled;
-                    practiceNewButton.disabled = state.practice.newDisabled;
-                    const practiceInputElement = document.getElementById('practice-answer-input');
-                    if (practiceInputElement) {
-                        practiceInputElement.value = state.practice.inputValue || '';
-                        practiceInputElement.disabled = state.practice.inputDisabled;
-                        // Restore styling (correct/incorrect)
-                        practiceInputElement.className = 'input-box'; // Reset first
-                        if (state.practice.inputClasses) {
-                            state.practice.inputClasses.forEach(cls => {
-                                if (cls !== 'input-box') practiceInputElement.classList.add(cls);
-                            });
-                        }
-                    }
-                } else if (activeTabId === 'practice-tab') {
-                    // If practice tab is active but no state, generate initial problem
-                    generatePracticeProblem();
-                }
-
-
-                // Restore Test State
-                if (state.test && state.test.problems && state.test.problems.length > 0) {
-                    testProblemsData = state.test.problems;
-                    testAnswersChecked = state.test.checked;
-                    displayTestProblems(state.test.answers); // Pass saved answers to display function
-                    testScoreAreaDiv.innerHTML = state.test.scoreHTML || '';
-                    testCheckButton.disabled = state.test.checkDisabled;
-                    testNewButton.disabled = state.test.newDisabled;
-
-                    // If test was checked, re-apply disabled state and styles to inputs
-                    if (testAnswersChecked) {
-                        testProblemsData.forEach((problem, index) => {
-                           const inputElement = document.getElementById(`test-answer-input-${index}`);
-                           if(inputElement) {
-                               inputElement.disabled = true;
-                               const userAnswer = parseInt(inputElement.value, 10); // Value was restored by displayTestProblems
-                               inputElement.classList.remove('correct', 'incorrect');
-                               if (!isNaN(userAnswer) && userAnswer === problem.correctAnswer) {
-                                    inputElement.classList.add('correct');
-                               } else {
-                                    inputElement.classList.add('incorrect');
-                               }
-                           }
-                        });
-                    }
-                } else if (activeTabId === 'test-tab') {
-                    // If test tab is active but no state, generate initial test
-                    generateTestProblems();
-                }
-
-                return true; // State loaded successfully
-
-            } catch (e) {
-                console.error("Error loading state from localStorage:", e);
-                localStorage.removeItem(STORAGE_KEY); // Clear corrupted state
-                return false; // Loading failed
-            }
-        }
-
-
-        // --- Tab Switching Logic ---
-        tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const targetTabId = button.getAttribute('data-tab');
-
-                // Deactivate all tabs (visually)
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                tabContents.forEach(content => content.classList.remove('active'));
-
-                // Activate target tab (visually)
-                button.classList.add('active');
-                const targetContent = document.getElementById(targetTabId);
-                if (targetContent) {
-                    targetContent.classList.add('active');
-                } else {
-                    console.error("Target tab content not found:", targetTabId);
-                    return; // Exit if target content doesn't exist
-                }
-
-
-                // Initialize content if it's empty and hasn't been loaded/restored
-                if (targetTabId === 'practice-tab') {
-                    // Generate only if the equation div is truly empty AND no problem data exists
-                    if (!practiceEquationDiv.hasChildNodes() && Object.keys(currentPracticeProblem).length === 0) {
-                         generatePracticeProblem();
-                    }
-                } else if (targetTabId === 'test-tab') {
-                     // Generate only if the list is empty AND no test data exists
-                     if (!testProblemsListDiv.hasChildNodes() && testProblemsData.length === 0) {
-                         generateTestProblems();
-                     }
-                }
-                saveState(); // Save state after switching tab and potentially initializing
-            });
-        });
-
-        // --- Problem Generation Logic (Common Core) ---
-         function generateSingleProblemData() {
-            let num1, num2, result, operator, correctAnswer, unknownPosition;
-            let isValid = false;
-            while (!isValid) {
-                const operationType = getRandomInt(0, 1);
-                unknownPosition = getRandomInt(0, 2);
-                isValid = true;
-
-                if (operationType === 0) { // Addition
-                    operator = '+';
-                    if (unknownPosition === 0) { // x + b = c
-                        num2 = getRandomInt(10, 89); result = getRandomInt(num2 + 10, 100); num1 = result - num2;
-                        if (num1 < 10) { isValid = false; continue; } correctAnswer = num1;
-                    } else if (unknownPosition === 1) { // a + x = c
-                        num1 = getRandomInt(10, 89); result = getRandomInt(num1 + 10, 100); num2 = result - num1;
-                        if (num2 < 10) { isValid = false; continue; } correctAnswer = num2;
-                    } else { // a + b = x
-                        num1 = getRandomInt(10, 89); num2 = getRandomInt(10, 100 - num1); result = num1 + num2;
-                        if (result < 10 || result > 100) { isValid = false; continue; } correctAnswer = result;
-                    }
-                } else { // Subtraction
-                    operator = '-';
-                    if (unknownPosition === 0) { // x - b = c
-                        num2 = getRandomInt(10, 89); result = getRandomInt(10, 100 - num2); num1 = result + num2;
-                        if (num1 < 10 || num1 > 100) { isValid = false; continue; } correctAnswer = num1;
-                    } else if (unknownPosition === 1) { // a - x = c
-                        num1 = getRandomInt(20, 100); result = getRandomInt(10, num1 - 10); num2 = num1 - result;
-                        if (num2 < 10) { isValid = false; continue; } correctAnswer = num2;
-                    } else { // a - b = x
-                        num1 = getRandomInt(20, 100); num2 = getRandomInt(10, num1 - 10); result = num1 - num2;
-                        if (result < 10) { isValid = false; continue; } correctAnswer = result;
-                    }
-                }
-            }
-            return { num1, num2, result, operator, correctAnswer, unknownPosition };
-        }
-
-         // --- Practice Tab Logic ---
-        const practiceEquationDiv = document.getElementById('practice-equation');
-        const practiceFeedbackDiv = document.getElementById('practice-feedback');
-        const practiceCheckButton = document.getElementById('practice-check-button');
-        const practiceNewButton = document.getElementById('practice-new-button');
-        let currentPracticeProblem = {};
-
-        function createPracticeInputBox() {
-            const input = document.createElement('input');
-            input.type = 'number'; input.id = 'practice-answer-input'; input.classList.add('input-box');
-            input.setAttribute('aria-label', 'Wpisz brakującą liczbę');
-            input.addEventListener('keypress', (event) => {
-                if (event.key === 'Enter' && !practiceCheckButton.disabled) {
-                    event.preventDefault(); checkPracticeAnswer();
+        // Inicjalizacja aplikacji
+        function init() {
+            loadStats();
+            displayStats();
+            loadNewProblem();
+            
+            // Event listenery
+            checkBtn.addEventListener('click', checkAnswer);
+            answerInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    checkAnswer();
                 }
             });
-            // Save state on input change (optional, can be performance heavy)
-            // input.addEventListener('input', saveState);
-            return input;
         }
 
-        function generatePracticeExplanation(problem) {
-             const { num1, num2, result, operator, correctAnswer, unknownPosition } = problem;
-            let explanationText = '';
-            switch (unknownPosition) {
-                case 0: explanationText = operator === '+' ? `Aby poznać wynik, odejmij ${num2} od ${result}: ${result} - ${num2} = ${correctAnswer}.` : `Aby poznać wynik, dodaj ${num2} do ${result}: ${result} + ${num2} = ${correctAnswer}.`; break;
-                case 1: explanationText = operator === '+' ? `Aby poznać wynik, odejmij ${num1} od ${result}: ${result} - ${num1} = ${correctAnswer}.` : `Aby poznać wynik, odejmij ${result} od ${num1}: ${num1} - ${result} = ${correctAnswer}.`; break;
-                case 2: explanationText = operator === '+' ? `Aby poznać wynik, dodaj ${num1} i ${num2}: ${num1} + ${num2} = ${correctAnswer}.` : `Aby poznać wynik, odejmij ${num2} od ${num1}: ${num1} - ${num2} = ${correctAnswer}.`; break;
+        // Ładowanie nowego zadania
+        function loadNewProblem() {
+            let availableProblems = problems.filter(p => p.id !== lastProblemId);
+            
+            if (availableProblems.length === 0) {
+                availableProblems = problems;
             }
-            return `<div class="explanation">💡 ${explanationText}</div>`;
+            
+            const randomIndex = Math.floor(Math.random() * availableProblems.length);
+            currentProblem = availableProblems[randomIndex];
+            lastProblemId = currentProblem.id;
+            
+            figureInfo.textContent = currentProblem.figure_description;
+            questionElement.textContent = currentProblem.question;
+            answerInput.value = '';
+            answerInput.focus();
+            
+            // Ukryj feedback
+            feedback.classList.remove('show');
         }
 
-        // Renders the practice problem based on data (used by generate and load)
-        function renderPracticeProblem(problemData) {
-             practiceEquationDiv.innerHTML = ''; // Clear previous
-             if (!problemData || Object.keys(problemData).length === 0) return; // Don't render if no data
-
-             const { num1, num2, result, operator, unknownPosition } = problemData;
-
-            if (unknownPosition === 0) { practiceEquationDiv.appendChild(createPracticeInputBox()); practiceEquationDiv.appendChild(createBox(operator, 'operator')); practiceEquationDiv.appendChild(createBox(num2)); practiceEquationDiv.appendChild(createBox('=', 'operator')); practiceEquationDiv.appendChild(createBox(result)); }
-            else if (unknownPosition === 1) { practiceEquationDiv.appendChild(createBox(num1)); practiceEquationDiv.appendChild(createBox(operator, 'operator')); practiceEquationDiv.appendChild(createPracticeInputBox()); practiceEquationDiv.appendChild(createBox('=', 'operator')); practiceEquationDiv.appendChild(createBox(result)); }
-            else { practiceEquationDiv.appendChild(createBox(num1)); practiceEquationDiv.appendChild(createBox(operator, 'operator')); practiceEquationDiv.appendChild(createBox(num2)); practiceEquationDiv.appendChild(createBox('=', 'operator')); practiceEquationDiv.appendChild(createPracticeInputBox()); }
-        }
-
-
-        function generatePracticeProblem() {
-            currentPracticeProblem = generateSingleProblemData();
-            renderPracticeProblem(currentPracticeProblem); // Use render function
-            practiceFeedbackDiv.innerHTML = '';
-
-            practiceCheckButton.disabled = false;
-            practiceNewButton.disabled = true;
-            const inputElement = document.getElementById('practice-answer-input');
-            if (inputElement) { inputElement.value = ''; inputElement.focus(); inputElement.disabled = false; inputElement.classList.remove('correct', 'incorrect');}
-            saveState(); // Save new practice state
-        }
-
-        function checkPracticeAnswer() {
-            const inputElement = document.getElementById('practice-answer-input');
-            // Ensure element exists before proceeding
-            if (!inputElement) {
-                console.error("Practice input element not found!");
+        // Sprawdzanie odpowiedzi
+        function checkAnswer() {
+            const userAnswer = parseInt(answerInput.value);
+            
+            if (isNaN(userAnswer)) {
+                showFeedback('Wpisz liczbę!', false);
                 return;
             }
-            const userAnswer = parseInt(inputElement.value, 10);
-            practiceFeedbackDiv.innerHTML = '';
-            inputElement.classList.remove('correct', 'incorrect');
-
-            if (isNaN(userAnswer)) {
-                practiceFeedbackDiv.textContent = 'Proszę wpisać liczbę!';
-                practiceFeedbackDiv.className = 'feedback-incorrect'; return;
-            }
-
-            if (userAnswer === currentPracticeProblem.correctAnswer) {
-                practiceFeedbackDiv.textContent = 'Świetnie! Dobra odpowiedź! 🎉';
-                practiceFeedbackDiv.className = 'feedback-correct';
-                inputElement.classList.add('correct');
+            
+            stats.total++;
+            
+            if (userAnswer === currentProblem.correct_answer) {
+                stats.correct++;
+                showFeedback(`🎉 Brawo! Poprawna odpowiedź: ${currentProblem.correct_answer}°`, true);
+                checkBtn.classList.add('bounce');
             } else {
-                practiceFeedbackDiv.innerHTML = `<span class="feedback-incorrect">Niestety, to nie ta liczba. Prawidłowa odpowiedź to ${currentPracticeProblem.correctAnswer}.</span> ${generatePracticeExplanation(currentPracticeProblem)}`;
-                inputElement.classList.add('incorrect');
+                showFeedback(`❌ Niepoprawnie. Prawidłowa odpowiedź to: ${currentProblem.correct_answer}°`, false);
             }
-            practiceCheckButton.disabled = true;
-            practiceNewButton.disabled = false;
-            inputElement.disabled = true;
-            saveState(); // Save state after checking
+            
+            saveStats();
+            displayStats();
+            
+            // Nowe zadanie po 3 sekundach
+            setTimeout(() => {
+                loadNewProblem();
+                checkBtn.classList.remove('bounce');
+            }, 3000);
         }
 
-        practiceCheckButton.addEventListener('click', checkPracticeAnswer);
-        practiceNewButton.addEventListener('click', generatePracticeProblem);
-
-
-        // --- Test Tab Logic ---
-        const testProblemsListDiv = document.getElementById('test-problems-list');
-        const testScoreAreaDiv = document.getElementById('test-score-area');
-        const testCheckButton = document.getElementById('test-check-button');
-        const testNewButton = document.getElementById('test-new-button');
-        let testProblemsData = [];
-        let testAnswersChecked = false;
-
-        function createTestInputBox(index) {
-            const input = document.createElement('input');
-            input.type = 'number'; input.id = `test-answer-input-${index}`; input.classList.add('input-box');
-            input.setAttribute('data-problem-index', index);
-            input.setAttribute('aria-label', `Odpowiedź do zadania ${index + 1}`);
-             // Save state on test input change (optional)
-            // input.addEventListener('input', saveState);
-            return input;
+        // Wyświetlanie feedback
+        function showFeedback(message, isCorrect) {
+            feedback.textContent = message;
+            feedback.className = `show ${isCorrect ? 'correct' : 'incorrect'}`;
         }
 
-        function generateTestProblems() {
-            testProblemsData = [];
-            for (let i = 0; i < NUM_TEST_PROBLEMS; i++) {
-                testProblemsData.push(generateSingleProblemData());
+        // Zarządzanie statystykami
+        function loadStats() {
+            const savedStats = localStorage.getItem('mathStats');
+            if (savedStats) {
+                stats = JSON.parse(savedStats);
             }
-            testAnswersChecked = false; // Reset checked state
-            displayTestProblems(); // Display empty problems
-            testScoreAreaDiv.innerHTML = '';
-            testCheckButton.disabled = false;
-            testNewButton.disabled = true; // Disable "New Test" until checked
-            saveState(); // Save the new test state (empty answers)
         }
 
-         // Modified to accept and populate saved answers
-         function displayTestProblems(savedAnswers = {}) {
-            testProblemsListDiv.innerHTML = '';
-            if (!testProblemsData || testProblemsData.length === 0) return; // Don't display if no data
-
-            testProblemsData.forEach((problem, index) => {
-                const itemDiv = document.createElement('div');
-                itemDiv.classList.add('test-problem-item');
-
-                const indexSpan = document.createElement('span');
-                indexSpan.classList.add('test-problem-index');
-                indexSpan.textContent = `${index + 1}.`;
-                itemDiv.appendChild(indexSpan);
-
-                const equationContainer = document.createElement('div');
-                equationContainer.classList.add('test-equation-container');
-                const { num1, num2, result, operator, unknownPosition } = problem;
-
-                let inputBox; // Define inputBox variable
-
-                if (unknownPosition === 0) { inputBox = createTestInputBox(index); equationContainer.appendChild(inputBox); equationContainer.appendChild(createBox(operator, 'operator')); equationContainer.appendChild(createBox(num2)); equationContainer.appendChild(createBox('=', 'operator')); equationContainer.appendChild(createBox(result)); }
-                else if (unknownPosition === 1) { equationContainer.appendChild(createBox(num1)); equationContainer.appendChild(createBox(operator, 'operator')); inputBox = createTestInputBox(index); equationContainer.appendChild(inputBox); equationContainer.appendChild(createBox('=', 'operator')); equationContainer.appendChild(createBox(result)); }
-                else { equationContainer.appendChild(createBox(num1)); equationContainer.appendChild(createBox(operator, 'operator')); equationContainer.appendChild(createBox(num2)); equationContainer.appendChild(createBox('=', 'operator')); inputBox = createTestInputBox(index); equationContainer.appendChild(inputBox); }
-
-                // Populate input value from saved state if available
-                 if (savedAnswers[index] !== undefined) {
-                     const currentInputBox = equationContainer.querySelector(`#test-answer-input-${index}`);
-                     if(currentInputBox) {
-                        currentInputBox.value = savedAnswers[index];
-                     }
-                 }
-
-                itemDiv.appendChild(equationContainer);
-                testProblemsListDiv.appendChild(itemDiv);
-            });
+        function saveStats() {
+            localStorage.setItem('mathStats', JSON.stringify(stats));
         }
 
-        function calculateGrade(score, total) {
-            const percentage = (score / total) * 100;
-            if (percentage >= 98) return '6'; // Celujący
-            if (percentage >= 90) return '5+';
-            if (percentage >= 80) return '5'; // Bardzo dobry
-            if (percentage >= 70) return '4+';
-            if (percentage >= 60) return '4'; // Dobry
-            if (percentage >= 50) return '3+';
-            if (percentage >= 40) return '3'; // Dostateczny
-            if (percentage >= 30) return '2+';
-             if (percentage >= 20) return '2'; // Dopuszczający
-            return '1'; // Niedostateczny
-        }
-
-        function checkTestAnswers() {
-            if (testAnswersChecked) return;
-             if (testProblemsData.length === 0) return; // Don't check if no problems
-
-            let score = 0;
-            testProblemsData.forEach((problem, index) => {
-                const inputElement = document.getElementById(`test-answer-input-${index}`);
-                if (!inputElement) return; // Skip if element not found
-                const userAnswer = parseInt(inputElement.value, 10);
-                inputElement.classList.remove('correct', 'incorrect');
-
-                if (!isNaN(userAnswer) && userAnswer === problem.correctAnswer) {
-                    score++;
-                    inputElement.classList.add('correct');
+        function displayStats() {
+            totalCount.textContent = stats.total;
+            correctCount.textContent = stats.correct;
+            
+            if (stats.total > 0) {
+                const accuracyPercent = Math.round((stats.correct / stats.total) * 100);
+                accuracy.textContent = `${accuracyPercent}%`;
+                
+                // Kolorowanie na podstawie skuteczności
+                if (accuracyPercent >= 80) {
+                    accuracy.style.color = '#00b894';
+                } else if (accuracyPercent >= 60) {
+                    accuracy.style.color = '#fdcb6e';
                 } else {
-                    inputElement.classList.add('incorrect');
+                    accuracy.style.color = '#e17055';
                 }
-                inputElement.disabled = true;
-            });
-
-            testAnswersChecked = true; // Set checked flag
-            const grade = calculateGrade(score, NUM_TEST_PROBLEMS);
-            testScoreAreaDiv.innerHTML = `Twój wynik: ${score} na ${NUM_TEST_PROBLEMS}.<br>Ocena: <span class="grade">${grade}</span>`;
-            testCheckButton.disabled = true;
-            testNewButton.disabled = false; // Enable "New Test" button
-            saveState(); // Save final test state (checked, scored)
+            } else {
+                accuracy.textContent = '0%';
+                accuracy.style.color = '#0984e3';
+            }
         }
 
-        testCheckButton.addEventListener('click', checkTestAnswers);
-        testNewButton.addEventListener('click', generateTestProblems); // Regenerates and saves state
-
-        // --- Initial Load ---
-        window.onload = () => {
-            const loaded = loadState(); // Try to load state first
-            if (!loaded) {
-                 // If no state was loaded, initialize default view manually
-                 const defaultTabId = 'practice-tab';
-                 tabButtons.forEach(btn => {
-                    btn.classList.toggle('active', btn.getAttribute('data-tab') === defaultTabId);
-                 });
-                 tabContents.forEach(content => {
-                    content.classList.toggle('active', content.id === defaultTabId);
-                 });
-                 generatePracticeProblem(); // Generate initial practice problem
-                 // Don't save state here, let user interaction trigger first save
-            }
-            // State loaded handles visibility via active class, no extra steps needed here.
-        };
-
+        // Uruchomienie aplikacji
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
