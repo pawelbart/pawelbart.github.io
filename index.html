@@ -3,220 +3,299 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Miernik Dystansu Myszki</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>Palety barw - Krajobrazy naturalne</title>
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            cursor: crosshair;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
         }
-        /* Dodatkowe style dla płynnych przejść */
-        .stat-value {
-            transition: all 0.2s ease-in-out;
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        .btn-reset {
-             transition: background-color 0.3s, transform 0.1s;
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
-        .btn-reset:active {
-            transform: scale(0.95);
+        
+        .palette-section {
+            margin-bottom: 50px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .palette-section:hover {
+            transform: translateY(-5px);
+        }
+        
+        .palette-header {
+            padding: 25px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .palette-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .palette-description {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+        
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0;
+        }
+        
+        .color-card {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 20px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .color-card:hover {
+            transform: scale(1.05);
+            z-index: 10;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        
+        .color-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.5s ease;
+        }
+        
+        .color-card:hover::before {
+            transform: translateX(100%);
+        }
+        
+        .color-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        
+        .color-code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .color-inspiration {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        
+        /* Amazońska dżungla */
+        .jungle .color-card:nth-child(1) { background: #0d4f3c; }
+        .jungle .color-card:nth-child(2) { background: #228B22; }
+        .jungle .color-card:nth-child(3) { background: #32CD32; }
+        .jungle .color-card:nth-child(4) { background: #7CFC00; }
+        .jungle .color-card:nth-child(5) { background: #8B4513; }
+        .jungle .color-card:nth-child(6) { background: #FF6347; }
+        
+        /* Afrykańska sawanna */
+        .savanna .color-card:nth-child(1) { background: #D2B48C; }
+        .savanna .color-card:nth-child(2) { background: #DAA520; }
+        .savanna .color-card:nth-child(3) { background: #CD853F; }
+        .savanna .color-card:nth-child(4) { background: #A0522D; }
+        .savanna .color-card:nth-child(5) { background: #DC143C; }
+        .savanna .color-card:nth-child(6) { background: #FF4500; }
+        
+        /* Nadwiślańskie szuwary */
+        .wetlands .color-card:nth-child(1) { background: #2F4F4F; }
+        .wetlands .color-card:nth-child(2) { background: #708090; }
+        .wetlands .color-card:nth-child(3) { background: #556B2F; }
+        .wetlands .color-card:nth-child(4) { background: #9ACD32; }
+        .wetlands .color-card:nth-child(5) { background: #87CEEB; }
+        .wetlands .color-card:nth-child(6) { background: #F0E68C; }
+        
+        @media (max-width: 768px) {
+            .color-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .palette-title {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white overflow-hidden">
-
-    <!-- Płótno do rysowania śladu myszki -->
-    <canvas id="trailCanvas" class="absolute top-0 left-0 w-full h-full z-0"></canvas>
-
-    <!-- Główny kontener z treścią -->
-    <div class="relative min-h-screen flex flex-col items-center justify-center text-center p-4 z-10">
+<body>
+    <div class="container">
+        <h1>Palety barw krajobrazów naturalnych</h1>
         
-        <div class="mb-8">
-            <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-indigo-400">Miernik Dystansu Myszki</h1>
-            <p class="text-gray-400 mt-2 text-lg">Poruszaj myszką, aby zobaczyć, jaką odległość pokonuje!</p>
-        </div>
-
-        <!-- Wyświetlanie dystansu -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-8 w-full max-w-4xl">
-            <div class="bg-gray-800/50 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-gray-700">
-                <p class="text-sm md:text-lg text-gray-400">Piksele</p>
-                <p id="pixels" class="stat-value text-2xl sm:text-3xl md:text-4xl font-black text-white">0</p>
+        <!-- Amazońska dżungla -->
+        <div class="palette-section">
+            <div class="palette-header">
+                <div class="palette-title">Amazońska dżungla</div>
+                <div class="palette-description">Bogactwo zieleni tropikalnego lasu deszczowego</div>
             </div>
-            <div class="bg-gray-800/50 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-gray-700">
-                <p class="text-sm md:text-lg text-gray-400">Centrymetry</p>
-                <p id="cm" class="stat-value text-2xl sm:text-3xl md:text-4xl font-black text-white">0.00</p>
+            <div class="color-grid jungle">
+                <div class="color-card">
+                    <div class="color-name">Głęboka zieleń</div>
+                    <div class="color-code">#0d4f3c</div>
+                    <div class="color-inspiration">Cień pod koronami drzew</div>
+                </div>
+                <div class="color-card">
+                    <div class="color-name">Zieleń lasu</div>
+                    <div class="color-code">#228B22</div>
+                    <div class="color-inspiration">Gęste liście podszyta</div>
+                </div>
+                <div class="color-card">
+                    <div class="color-name">Limonkowa zieleń</div>
+                    <div class="color-code">#32CD32</div>
+                    <div class="color-inspiration">Młode pędy i liście</div>
+                </div>
+                <div class="color-card">
+                    <div class="color-name">Jasna zieleń</div>
+                    <div class="color-code">#7CFC00</div>
+                    <div class="color-inspiration">Światło filtrowane przez liście</div>
+                </div>
+                <div class="color-card">
+                    <div class="color-name">Brąz kory</div>
+                    <div class="color-code">#8B4513</div>
+                    <div class="color-inspiration">Pnie tropikalnych drzew</div>
+                </div>
+                <div class="color-card">
+                    <div class="color-name">Czerwień kwiatów</div>
+                    <div class="color-code">#FF6347</div>
+                    <div class="color-inspiration">Egzotyczne kwiaty</div>
+                </div>
             </div>
-            <div class="bg-gray-800/50 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-gray-700">
-                <p class="text-sm md:text-lg text-gray-400">Merty</p>
-                <p id="meters" class="stat-value text-2xl sm:text-3xl md:text-4xl font-black text-white">0.00</p>
-            </div>
-            <div class="bg-gray-800/50 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-gray-700">
-                <p class="text-sm md:text-lg text-gray-400">Kilometry</p>
-                <p id="km" class="stat-value text-2xl sm:text-3xl md:text-4xl font-black text-white">0.00</p>
-            </div>
-        </div>
-
-        <!-- Przycisk resetowania -->
-        <div class="mt-12">
-            <button id="resetButton" class="btn-reset bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg">
-                Resetuj
-            </button>
         </div>
         
-        <footer class="absolute bottom-4 text-gray-500 text-sm">
-            <p>Obliczenia oparte na standardowej wartości 96 DPI (pikseli na cal).</p>
-        </footer>
+        <!-- Afrykańska sawanna -->
+        <div class="palette-section">
+            <div class="palette-header">
+                <div class="palette-title">Afrykańska sawanna</div>
+                <div class="palette-description">Ciepłe barwy afrykańskich równin</div>
+            </div>
+            <div class="color-grid savanna">
+                <div class="color-card">
+                    <div class="color-name">Beżowa trawa</div>
+                    <div class="color-code">#D2B48C</div>
+                    <div class="color-inspiration">Wysuszona trawa</div>
+                </div>
+                <div class="color-card">
+                    <div class="color-name">Złoty piasek</div>
+                    <div class="color-code">#DAA520</div>
+                    <div class="color-inspiration">Piaszczyste gleby</div>
+                </div>
+                <div class="color-card">
+                    <div class="color-name">Brąz ziemi</div>
+                    <div class="color-code">#CD853F</div>
+                    <div class="color-inspiration">Czerwona gleba</div>
+                </div>
+                <div class="color-card">
+                    <div class="color-name">Kora baobabów</div>
+                    <div class="color-code">#A0522D</div>
+                    <div class="color-inspiration">Pnie akacji</div>
+                </div>
+                <div class="color-card">
+                    <div class="color-name">Zachód słońca</div>
+                    <div class="color-code">#DC143C</div>
+                    <div class="color-inspiration">Wieczorne niebo</div>
+                </div>
+                <div class="color-card">
+                    <div class="color-name">Płomień</div>
+                    <div class="color-code">#FF4500</div>
+                    <div class="color-inspiration">Promienie słońca</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Nadwiślańskie szuwary -->
+        <div class="palette-section">
+            <div class="palette-header">
+                <div class="palette-title">Nadwiślańskie szuwary</div>
+                <div class="palette-description">Spokojne barwy polskich terenów podmokłych</div>
+            </div>
+            <div class="color-grid wetlands">
+                <div class="color-card">
+                    <div class="color-name">Ciemnoszara woda</div>
+                    <div class="color-code">#2F4F4F</div>
+                    <div class="color-inspiration">Głębokie wody Wisły</div>
+                </div>
+                <div class="color-card">
+                    <div class="color-name">Szary łupek</div>
+                    <div class="color-code">#708090</div>
+                    <div class="color-inspiration">Brzeg pokryty mułem</div>
+                </div>
+                <div class="color-card">
+                    <div class="color-name">Ciemnozielone trzcinowiska</div>
+                    <div class="color-code">#556B2F</div>
+                    <div class="color-inspiration">Gęste szuwary</div>
+                </div>
+                <div class="color-card">
+                    <div class="color-name">Żółtozielona trzcina</div>
+                    <div class="color-code">#9ACD32</div>
+                    <div class="color-inspiration">Młode pędy trzcinowisk</div>
+                </div>
+                <div class="color-card">
+                    <div class="color-name">Błękitne niebo</div>
+                    <div class="color-code">#87CEEB</div>
+                    <div class="color-inspiration">Odbicie nieba w wodzie</div>
+                </div>
+                <div class="color-card">
+                    <div class="color-name">Słomkowa zieleń</div>
+                    <div class="color-code">#F0E68C</div>
+                    <div class="color-inspiration">Jesienne trawy</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // --- Referencje do elementów DOM ---
-        const pixelsEl = document.getElementById('pixels');
-        const cmEl = document.getElementById('cm');
-        const metersEl = document.getElementById('meters');
-        const kmEl = document.getElementById('km');
-        const resetButton = document.getElementById('resetButton');
-        const canvas = document.getElementById('trailCanvas');
-        const ctx = canvas.getContext('2d');
-
-        // --- Zmienne stanu ---
-        let lastX = 0;
-        let lastY = 0;
-        let totalDistancePixels = 0;
-        let isFirstMove = true;
-        let particles = [];
-
-        // --- Stałe konwersji ---
-        const DPI = 96; // Standardowa wartość pikseli na cal
-        const INCH_TO_CM = 2.54;
-
-        // --- Ustawienia canvasa ---
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        // --- Główne funkcje ---
-
-        /**
-         * Aktualizuje wyświetlane wartości dystansu.
-         */
-        function updateDisplay() {
-            const distanceCm = (totalDistancePixels / DPI) * INCH_TO_CM;
-            const distanceM = distanceCm / 100;
-            const distanceKm = distanceM / 1000;
-
-            pixelsEl.textContent = Math.round(totalDistancePixels).toLocaleString('pl-PL');
-            cmEl.textContent = distanceCm.toFixed(2);
-            metersEl.textContent = distanceM.toFixed(2);
-            kmEl.textContent = distanceKm.toFixed(5);
-        }
-
-        /**
-         * Obsługuje zdarzenie poruszenia myszką.
-         * @param {MouseEvent} e - Obiekt zdarzenia myszy.
-         */
-        function handleMouseMove(e) {
-            if (isFirstMove) {
-                lastX = e.clientX;
-                lastY = e.clientY;
-                isFirstMove = false;
-                return;
-            }
-
-            const currentX = e.clientX;
-            const currentY = e.clientY;
-
-            // Obliczenie dystansu przy użyciu twierdzenia Pitagorasa
-            const dx = currentX - lastX;
-            const dy = currentY - lastY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            totalDistancePixels += distance;
-
-            // Zaktualizowanie pozycji
-            lastX = currentX;
-            lastY = currentY;
-
-            updateDisplay();
-
-            // Dodanie cząsteczki do śladu
-            addParticle(currentX, currentY, dx, dy);
-        }
-
-        /**
-         * Resetuje licznik dystansu.
-         */
-        function resetCounter() {
-            totalDistancePixels = 0;
-            isFirstMove = true;
-            particles = []; // Czyści również cząsteczki
-            updateDisplay();
-            // Czyści canvas natychmiast po resecie
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-
-        // --- Logika śladu myszki (cząsteczki) ---
-
-        /**
-         * Dodaje nową cząsteczkę do animacji.
-         * @param {number} x - Pozycja X.
-         * @param {number} y - Pozycja Y.
-         * @param {number} dx - Zmiana na osi X.
-         * @param {number} dy - Zmiana na osi Y.
-         */
-        function addParticle(x, y, dx, dy) {
-            const speed = Math.sqrt(dx * dx + dy * dy);
-            particles.push({
-                x: x,
-                y: y,
-                life: 30 + speed * 2, // Dłuższe życie przy szybszym ruchu
-                radius: 1 + speed / 4, // Większy promień przy szybszym ruchu
-                color: `hsl(${240 + speed * 5}, 100%, 70%)` // Zmiana koloru w zależności od prędkości
+        // Kopiowanie kodu koloru do schowka po kliknięciu
+        document.querySelectorAll('.color-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const colorCode = this.querySelector('.color-code').textContent;
+                navigator.clipboard.writeText(colorCode).then(() => {
+                    // Krótka animacja potwierdzenia
+                    const originalText = this.querySelector('.color-code').textContent;
+                    this.querySelector('.color-code').textContent = 'Skopiowano!';
+                    setTimeout(() => {
+                        this.querySelector('.color-code').textContent = originalText;
+                    }, 1000);
+                });
             });
-        }
-        
-        /**
-         * Pętla animacji do rysowania i aktualizowania cząsteczek.
-         */
-        function animateTrail() {
-            // Delikatne czyszczenie canvasa, aby uzyskać efekt zanikania
-            ctx.fillStyle = 'rgba(17, 24, 39, 0.2)'; // Kolor tła body z przezroczystością
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
-                
-                // Rysowanie cząsteczki
-                ctx.beginPath();
-                ctx.fillStyle = p.color;
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Aktualizacja życia cząsteczki
-                p.life--;
-                p.radius *= 0.98; // Stopniowe zmniejszanie
-
-                // Usunięcie martwej cząsteczki
-                if (p.life <= 0) {
-                    particles.splice(i, 1);
-                }
-            }
-
-            requestAnimationFrame(animateTrail);
-        }
-
-        // --- Inicjalizacja ---
-        document.addEventListener('mousemove', handleMouseMove);
-        resetButton.addEventListener('click', resetCounter);
-
-        // Uruchomienie pętli animacji
-        animateTrail();
-        // Ustawienie początkowych wartości na zero
-        updateDisplay();
+        });
     </script>
 </body>
 </html>
